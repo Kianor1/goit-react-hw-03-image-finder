@@ -8,6 +8,7 @@
   border: 1px solid black;
   background-color: blue;
   color: white;
+  margin: 0 auto;
 
   &:hover {
     background-color: lightgreen;

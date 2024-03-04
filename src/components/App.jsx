@@ -4,6 +4,7 @@ import { Button } from './Button/Button.jsx';
 import { ImageGallery } from './ImageGallery/ImageGallery.jsx';
 import { Modal } from './Modal/Modal.jsx';
 import Loader from './Loader/Loader';
+import s from './App.module.css';
 
 export class App extends Component {
   state = {
@@ -80,7 +81,7 @@ export class App extends Component {
   render() {
     const { images, isLoading, showModal, largeImageURL } = this.state;
     return (
-      <div>
+      <div className={s.galleryWrapper}>
         <Searchbar onSubmit={this.handleSearchSubmit} />
         <ImageGallery images={images} onSelect={this.openModal} />
         {isLoading && <Loader />}
