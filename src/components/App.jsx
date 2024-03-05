@@ -20,23 +20,26 @@ export class App extends Component {
     error: null,
   };
 
-  async componentDidMount() {
-    try {
-      const { hits, totalHits } = await fetchImages(
-        this.state.page,
-        this.state.step
-      );
-      this.setState({ isLoading: true });
-      this.setState({ images: hits, totalImages: totalHits });
-    } catch (error) {
-      this.setState({ error });
-    } finally {
-      this.setState({ isLoading: false });
-    }
-  }
+  // async componentDidMount() {
+  //   try {
+  //     const { hits, totalHits } = await fetchImages(
+  //       this.state.page,
+  //       this.state.step
+  //     );
+  //     this.setState({ isLoading: true });
+  //     this.setState({ images: hits, totalImages: totalHits });
+  //   } catch (error) {
+  //     this.setState({ error });
+  //   } finally {
+  //     this.setState({ isLoading: false });
+  //   }
+  // }
 
   async componentDidUpdate(prevProps, prevState) {
-    if (prevState.page !== this.state.page) {
+    if (
+      prevState.page !== this.state.page ||
+      prevState.query !== this.state.query
+    ) {
       const data = await fetchImages(this.state.page, this.state.step);
       this.setState(prevState => ({ images: [...prevState.images, ...data] }));
     }
