@@ -24,7 +24,8 @@ export class App extends Component {
     try {
       const { hits, totalHits } = await fetchImages(
         this.state.page,
-        this.state.step
+        this.state.step,
+        this.state.query
       );
       this.setState({ isLoading: true });
       this.setState({ images: hits, totalImages: totalHits });
@@ -37,8 +38,15 @@ export class App extends Component {
 
   async componentDidUpdate(prevProps, prevState) {
     try {
-      if (prevState.page !== this.state.page) {
-        const data = await fetchImages(this.state.page, this.state.step);
+      if (
+        prevState.page !== this.state.page ||
+        prevState.query !== this.state.query
+      ) {
+        const data = await fetchImages(
+          this.state.page,
+          this.state.step,
+          this.state.query
+        );
         this.setState(prevState => ({
           images: [...prevState.images, ...data.hits],
         }));
@@ -56,13 +64,21 @@ export class App extends Component {
     this.setState(prevState => ({ page: prevState.page + 1 }));
   };
 
+  handleEscClose = e => {
+    if (e.code === 'Escape' && this.state.showModal) {
+      this.closeModal();
+    }
+  };
+
   openModal = largeImageURL => {
+    window.addEventListener('keydown', this.handleEscClose);
     this.setState({ largeImageURL, showModal: true });
   };
 
-  // closeModal = () => {
-  //   this.setState({ showModal: false });
-  // };
+  closeModal = () => {
+    window.removeEventListener('keydown', this.handleEscClose);
+    this.setState({ showModal: false });
+  };
 
   render() {
     const { images, isLoading, showModal, largeImageURL } = this.state;

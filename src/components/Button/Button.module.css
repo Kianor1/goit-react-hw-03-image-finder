@@ -9,14 +9,10 @@
   background-color: blue;
   color: white;
   margin: 0 auto;
+}
 
-  &:hover {
-    background-color: lightgreen;
-    color: black;
-  }
-
-  &:focus {
-    background-color: lightgreen;
-    color: black;
-  }
+.buttonMore:hover,
+.buttonMore:hover {
+  background-color: lightgreen;
+  color: black;
 }
