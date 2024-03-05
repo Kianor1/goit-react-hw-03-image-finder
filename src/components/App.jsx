@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { fetchImages } from './services/api';
 import Searchbar from './Searchbar/Searchbar';
 import { Button } from './Button/Button.jsx';
 import { ImageGallery } from './ImageGallery/ImageGallery.jsx';
@@ -9,74 +10,53 @@ import s from './App.module.css';
 export class App extends Component {
   state = {
     images: [],
+    totalImages: 0,
     query: '',
     page: 1,
+    step: 12,
     largeImageURL: '',
     isLoading: false,
     showModal: false,
+    error: null,
   };
 
-  componentDidMount() {
-    window.addEventListener('keydown', this.handleEscapeKeyPress);
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.query !== this.state.query) {
-      this.fetchImages();
+  async componentDidMount() {
+    try {
+      const { hits, totalHits } = await fetchImages(
+        this.state.page,
+        this.state.step
+      );
+      this.setState({ isLoading: true });
+      this.setState({ images: hits, totalImages: totalHits });
+    } catch (error) {
+      this.setState({ error });
+    } finally {
+      this.setState({ isLoading: false });
     }
   }
 
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.handleEscapeKeyPress);
-  }
-
-  handleEscapeKeyPress = e => {
-    if (e.code === 'Escape') {
-      this.closeModal();
+  async componentDidUpdate(prevProps, prevState) {
+    if (prevState.page !== this.state.page) {
+      const data = await fetchImages(this.state.page, this.state.step);
+      this.setState(prevState => ({ images: [...prevState.images, ...data] }));
     }
-  };
+  }
 
   handleSearchSubmit = query => {
     this.setState({ query, page: 1, images: [] });
   };
 
-  fetchImages = async () => {
-    const { query, page } = this.state;
-    const BASE_URL = `https://pixabay.com/api/?q=${query}&page=${page}&key=42111454-a6064c7507ecd0abc8356168a&image_type=photo&orientation=horizontal&per_page=12`;
-
-    this.setState({ isLoading: true });
-
-    try {
-      const response = await fetch(BASE_URL);
-      const data = await response.json();
-      const images = data.hits.map(({ id, webformatURL, largeImageURL }) => ({
-        id,
-        webformatURL,
-        largeImageURL,
-      }));
-
-      this.setState(prevState => ({
-        images: [...prevState.images, ...images],
-        page: prevState.page + 1,
-      }));
-    } catch (error) {
-      console.error('Error loading images:', error);
-    } finally {
-      this.setState({ isLoading: false });
-    }
-  };
-
-  loadMoreImages = () => {
-    this.fetchImages();
+  handleLoadMore = () => {
+    this.setState(prevState => ({ page: prevState.page + 1 }));
   };
 
   openModal = largeImageURL => {
     this.setState({ largeImageURL, showModal: true });
   };
 
-  closeModal = () => {
-    this.setState({ showModal: false });
-  };
+  // closeModal = () => {
+  //   this.setState({ showModal: false });
+  // };
 
   render() {
     const { images, isLoading, showModal, largeImageURL } = this.state;
@@ -86,7 +66,7 @@ export class App extends Component {
         <ImageGallery images={images} onSelect={this.openModal} />
         {isLoading && <Loader />}
         {images.length > 0 && !isLoading && (
-          <Button onClick={this.loadMoreImages} />
+          <Button onClick={this.handleLoadMore} loading={isLoading} />
         )}
         {showModal && (
           <Modal largeImageURL={largeImageURL} onClose={this.closeModal} />

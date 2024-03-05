@@ -1,10 +1,10 @@
 import React from 'react';
 import s from './Button.module.css';
 
-export const Button = () => {
+export const Button = loading => {
   return (
     <button type="button" className={s.buttonMore}>
-      Load more...
+      {loading ? 'Load more' : 'Loading...'}
     </button>
   );
 };
