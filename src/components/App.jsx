@@ -20,28 +20,31 @@ export class App extends Component {
     error: null,
   };
 
-  // async componentDidMount() {
-  //   try {
-  //     const { hits, totalHits } = await fetchImages(
-  //       this.state.page,
-  //       this.state.step
-  //     );
-  //     this.setState({ isLoading: true });
-  //     this.setState({ images: hits, totalImages: totalHits });
-  //   } catch (error) {
-  //     this.setState({ error });
-  //   } finally {
-  //     this.setState({ isLoading: false });
-  //   }
-  // }
+  async componentDidMount() {
+    try {
+      const { hits, totalHits } = await fetchImages(
+        this.state.page,
+        this.state.step
+      );
+      this.setState({ isLoading: true });
+      this.setState({ images: hits, totalImages: totalHits });
+    } catch (error) {
+      this.setState({ error });
+    } finally {
+      this.setState({ isLoading: false });
+    }
+  }
 
   async componentDidUpdate(prevProps, prevState) {
-    if (
-      prevState.page !== this.state.page ||
-      prevState.query !== this.state.query
-    ) {
-      const data = await fetchImages(this.state.page, this.state.step);
-      this.setState(prevState => ({ images: [...prevState.images, ...data] }));
+    try {
+      if (prevState.page !== this.state.page) {
+        const data = await fetchImages(this.state.page, this.state.step);
+        this.setState(prevState => ({
+          images: [...prevState.images, ...data.hits],
+        }));
+      }
+    } catch (error) {
+      this.setState({ error });
     }
   }
 
@@ -66,10 +69,12 @@ export class App extends Component {
     return (
       <div className={s.galleryWrapper}>
         <Searchbar onSubmit={this.handleSearchSubmit} />
-        <ImageGallery images={images} onSelect={this.openModal} />
+        {images.length > 0 && (
+          <ImageGallery images={images} onSelect={this.openModal} />
+        )}
         {isLoading && <Loader />}
-        {images.length > 0 && !isLoading && (
-          <Button onClick={this.handleLoadMore} loading={isLoading} />
+        {images.length > 0 && (
+          <Button handleLoadMore={this.handleLoadMore} loading={isLoading} />
         )}
         {showModal && (
           <Modal largeImageURL={largeImageURL} onClose={this.closeModal} />
